@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך לפורטל"מ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        strong {
+            color: #264f73;
+        }
+
+        body {
+            background-color: #1a2633;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #000000;
+            padding: 20px;
+        }
+
+        .guide-container {
+            background-image: url('texture.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 1340px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* שורת הניווט בחלק העליון ביותר */
+        .tab-navigation {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 2px solid #65a0b3;
+            /* כחול בהיר */
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #264f73;
+            /* כחול כהה */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            background-color: #65a0b3;
+            color: #ffffff;
+        }
+
+        .tab.active {
+            background-color: #264f73;
+            border-color: #264f73;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(38, 79, 115, 0.2);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .slide-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #264f73;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .vertical-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 15px;
+        }
+
+        /* עיצוב קריא לסריקה מהירה בתבנית F */
+        .text-section {
+            background-color: rgba(255, 255, 255, 0.75);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: right;
+            border-right: 5px solid #264f73;
+            max-width: 750px;
+            /* הגבלת רוחב לשורות קצרות וקריאות יותר */
+            width: 100%;
+        }
+
+        .text-section p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 0;
+            color: #000000;
+        }
+
+        .text-block {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .text-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .image-wrapper {
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 1280 / 644;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        .carousel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* בקרת חצים מעוצבת - מתחת לתמונה באמצע */
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .circle-badge {
+            background-color: transparent;
+            color: #264f73;
+            border: 2px solid #264f73;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .circle-badge.filled {
+            background-color: #264f73;
+            color: #ffffff;
+        }
+
+        .circle-badge.stroke {
+            background-color: transparent;
+            color: #264f73;
+        }
+
+        button.circle-badge {
+            cursor: pointer;
+        }
+
+        button.circle-badge:hover {
+            background-color: #65a0b3;
+            border-color: #65a0b3;
+            color: #ffffff;
+        }
+
+        .nav-btn {
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
+        }
+
+        .coin-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+        }
+
+        .nav-btn .coin-icon {
+            width: 22px;
+            height: 22px;
+        }
+
+        .placeholder-box {
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 1280 / 644;
+            border: 2px dashed #65a0b3;
+            background-color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #264f73;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="guide-container">
+
+        <div class="tab-navigation">
+            <div class="tab active" onclick="openTab('tab1', this)">1. מחפשים ובוחרים</div>
+            <div class="tab" onclick="openTab('tab2', this)">2. מתחברים ויוצרים</div>
+            <div class="tab" onclick="openTab('tab3', this)">3. עורכים ו-AI</div>
+            <div class="tab" onclick="openTab('tab4', this)">4. מפרסמים ומשתפים</div>
+        </div>
+
+        <div id="tab1" class="tab-content active">
+            <div class="vertical-layout">
+                <div class="text-section">
+                    <h2 class="slide-title"><i class="fa-solid fa-magnifying-glass"></i> מחפשים ובוחרים</h2>
+                    <div class="text-block">
+                        <button id="badge-1" class="circle-badge filled" onclick="goToImage(0)">1</button>
+                        <p>בכניסה לפורטל"מ תוכלו לחפש מחולל ספציפי או לסנן את המשחקים לפי סוג (למשל: שאלות חד-ברירה,
+                            מיון,
+                            התאמה או סדר).</p>
+                    </div>
+                    <div class="text-block">
+                        <button id="badge-2" class="circle-badge stroke" onclick="goToImage(1)">2</button>
+                        <p>ברגע שתרחפו עם העכבר על המחולל שבו תרצו להשתמש, יופיעו שני כפתורים: כפתור
+                            <strong>"הפעלה"</strong> כדי לשחק במשחק קיים, וכפתור <strong>"יצירה"</strong> כדי לבנות משחק
+                            חדש
+                            משלכם.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="image-section">
+                    <div class="image-wrapper">
+                        <img id="step1-img" class="carousel-img" src="guide_images/pic1.png" alt="שלב 1 תמונה 1">
+                    </div>
+
+                    <div class="carousel-controls">
+                        <button id="nav-btn-1" class="circle-badge nav-btn filled" onclick="goToImage(0)">1</button>
+                        <button id="nav-btn-2" class="circle-badge nav-btn stroke" onclick="goToImage(1)">2</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab2" class="tab-content">
+            <div class="vertical-layout">
+                <div class="text-section">
+                    <h2 class="slide-title"><i class="fa-solid fa-user-plus"></i> מתחברים ויוצרים</h2>
+                    <div class="text-block">
+                        <button id="badge-t2-1" class="circle-badge filled" onclick="goToImageTab2(0)">1</button>
+                        <p>כדי לגשת לאפשרויות העריכה וליצור משחק, נדרש ליצור חשבון או פשוט להתחבר לפורטל"מ (אפשר להתחבר
+                            בקלות דרך חשבון Google שלכם).</p>
+                    </div>
+                    <div class="text-block">
+                        <button id="badge-t2-2" class="circle-badge stroke" onclick="goToImageTab2(1)">2</button>
+                        <p>לאחר ההתחברות תגיעו למסך הראשי. תהליך היצירה אמנם משתנה קצת בין מחולל למחולל, אבל הבסיס תמיד
+                            זהה:
+                            מתחילים בהגדרת שם המשחק שלכם, ולוחצים על "יצירת משחק".</p>
+                    </div>
+                </div>
+                <div class="image-section">
+                    <div class="image-wrapper">
+                        <img id="step2-img" class="carousel-img" src="guide_images/pic3.png" alt="שלב 2 תמונה 1">
+                    </div>
+                    <div class="carousel-controls">
+                        <button id="nav-btn-t2-1" class="circle-badge nav-btn filled"
+                            onclick="goToImageTab2(0)">1</button>
+                        <button id="nav-btn-t2-2" class="circle-badge nav-btn stroke"
+                            onclick="goToImageTab2(1)">2</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab3" class="tab-content">
+            <div class="vertical-layout">
+                <div class="text-section">
+                    <h2 class="slide-title"><i class="fa-solid fa-wand-magic-sparkles"></i> עורכים ומשלבים AI</h2>
+                    <div class="text-block">
+                        <button id="badge-t3-1" class="circle-badge filled" onclick="goToImageTab3(0)">1</button>
+                        <p>כאן מתחיל הכיף! מלאו את שדות השאלות והתשובות (בהתאם לסוג המשחק), ואפשר
+                            ומומלץ לשלב גם תמונות כדי להפוך את הלמידה לויזואלית.</p>
+                    </div>
+                    <div class="text-block">
+                        <button id="badge-t3-2" class="circle-badge stroke" onclick="goToImageTab3(1)">
+                            <img src="coin.png" class="coin-icon" alt="מטבע">
+                        </button>
+                        <p><strong>טיפ מאיתנו:</strong> רוצים לחסוך זמן? המשחק שהתנסיתם בו למעלה (Hit and Quack) מגיע עם
+                            עוזר AI שיכתוב עבורכם את התוכן בשניות! הפעילו שיקול דעת ובידקו ..AI עושה טעויות ;ׂ) תוסיפו
+                            לזה את העובדה שהוא מותאם לשני שחקנים – וקיבלתם כלי מושלם לשיעור פרטי.</p>
+                    </div>
+                </div>
+                <div class="image-section">
+                    <div class="image-wrapper">
+                        <img id="step3-img" class="carousel-img" src="guide_images/pic5.png" alt="שלב 3 תמונה 1">
+                    </div>
+                    <div class="carousel-controls">
+                        <button id="nav-btn-t3-1" class="circle-badge nav-btn filled"
+                            onclick="goToImageTab3(0)">1</button>
+                        <button id="nav-btn-t3-2" class="circle-badge nav-btn stroke" onclick="goToImageTab3(1)">
+                            <img src="coin.png" class="coin-icon" alt="מטבע">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab4" class="tab-content">
+            <div class="vertical-layout">
+                <div class="text-section">
+                    <h2 class="slide-title"><i class="fa-solid fa-share-nodes"></i> מפרסמים ומשתפים</h2>
+                    <div class="text-block">
+                        <button id="badge-t4-1" class="circle-badge filled" onclick="goToImageTab4(0)">1</button>
+                        <p>רגע לפני שמשתפים, ודאו שעמדתם בתנאי הסף לפרסום המשחק. כדי שהתלמידים יוכלו לשחק, סמנו את תיבת
+                            ה<strong>"פרסום"</strong> שתהפוך את המשחק לציבורי.</p>
+                    </div>
+                    <div class="text-block">
+                        <button id="badge-t4-2" class="circle-badge stroke" onclick="goToImageTab4(1)">2</button>
+                        <p><strong>איך משתפים?</strong> העתיקו את שורת הכתובת (הקישור) של הדף, ושלחו אותה לתלמיד יחד עם
+                            קוד המשחק הייחודי שלכם. התלמיד יזין את הקוד באתר – וייכנס למשחק!</p>
+                    </div>
+                </div>
+                <div class="image-section">
+                    <div class="image-wrapper">
+                        <img id="step4-img" class="carousel-img" src="guide_images/pic7.png" alt="שלב 4 תמונה 1">
+                    </div>
+                    <div class="carousel-controls">
+                        <button id="nav-btn-t4-1" class="circle-badge nav-btn filled"
+                            onclick="goToImageTab4(0)">1</button>
+                        <button id="nav-btn-t4-2" class="circle-badge nav-btn stroke"
+                            onclick="goToImageTab4(1)">2</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openTab(tabId, element) {
+            var contents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+            var tabs = document.getElementsByClassName("tab");
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+            document.getElementById(tabId).classList.add("active");
+            element.classList.add("active");
+        }
+
+        // ניהול גלריית תמונות לשלב 1
+        const imagesStep1 = ["guide_images/pic1.png", "guide_images/pic2.png"];
+
+        function goToImage(index) {
+            document.getElementById("step1-img").src = imagesStep1[index];
+
+            const badge1 = document.getElementById("badge-1");
+            const badge2 = document.getElementById("badge-2");
+            const navBtn1 = document.getElementById("nav-btn-1");
+            const navBtn2 = document.getElementById("nav-btn-2");
+
+            if (index === 0) {
+                badge1.className = "circle-badge filled";
+                navBtn1.className = "circle-badge nav-btn filled";
+                badge2.className = "circle-badge stroke";
+                navBtn2.className = "circle-badge nav-btn stroke";
+            } else {
+                badge1.className = "circle-badge stroke";
+                navBtn1.className = "circle-badge nav-btn stroke";
+                badge2.className = "circle-badge filled";
+                navBtn2.className = "circle-badge nav-btn filled";
+            }
+        }
+
+        // ניהול גלריית תמונות לשלב 2
+        const imagesStep2 = ["guide_images/pic3.png", "guide_images/pic4.png"];
+
+        function goToImageTab2(index) {
+            document.getElementById("step2-img").src = imagesStep2[index];
+
+            const badge1 = document.getElementById("badge-t2-1");
+            const badge2 = document.getElementById("badge-t2-2");
+            const navBtn1 = document.getElementById("nav-btn-t2-1");
+            const navBtn2 = document.getElementById("nav-btn-t2-2");
+
+            if (index === 0) {
+                badge1.className = "circle-badge filled";
+                navBtn1.className = "circle-badge nav-btn filled";
+                badge2.className = "circle-badge stroke";
+                navBtn2.className = "circle-badge nav-btn stroke";
+            } else {
+                badge1.className = "circle-badge stroke";
+                navBtn1.className = "circle-badge nav-btn stroke";
+                badge2.className = "circle-badge filled";
+                navBtn2.className = "circle-badge nav-btn filled";
+            }
+        }
+
+        // ניהול גלריית תמונות לשלב 3
+        const imagesStep3 = ["guide_images/pic5.png", "guide_images/pic6.png"];
+
+        function goToImageTab3(index) {
+            document.getElementById("step3-img").src = imagesStep3[index];
+
+            const badge1 = document.getElementById("badge-t3-1");
+            const badge2 = document.getElementById("badge-t3-2");
+            const navBtn1 = document.getElementById("nav-btn-t3-1");
+            const navBtn2 = document.getElementById("nav-btn-t3-2");
+
+            if (index === 0) {
+                badge1.className = "circle-badge filled";
+                navBtn1.className = "circle-badge nav-btn filled";
+                badge2.className = "circle-badge stroke";
+                navBtn2.className = "circle-badge nav-btn stroke";
+            } else {
+                badge1.className = "circle-badge stroke";
+                navBtn1.className = "circle-badge nav-btn stroke";
+                badge2.className = "circle-badge filled";
+                navBtn2.className = "circle-badge nav-btn filled";
+            }
+        }
+
+        // ניהול גלריית תמונות לשלב 4
+        const imagesStep4 = ["guide_images/pic7.png", "guide_images/pic8.png"];
+
+        function goToImageTab4(index) {
+            document.getElementById("step4-img").src = imagesStep4[index];
+
+            const badge1 = document.getElementById("badge-t4-1");
+            const badge2 = document.getElementById("badge-t4-2");
+            const navBtn1 = document.getElementById("nav-btn-t4-1");
+            const navBtn2 = document.getElementById("nav-btn-t4-2");
+
+            if (index === 0) {
+                badge1.className = "circle-badge filled";
+                navBtn1.className = "circle-badge nav-btn filled";
+                badge2.className = "circle-badge stroke";
+                navBtn2.className = "circle-badge nav-btn stroke";
+            } else {
+                badge1.className = "circle-badge stroke";
+                navBtn1.className = "circle-badge nav-btn stroke";
+                badge2.className = "circle-badge filled";
+                navBtn2.className = "circle-badge nav-btn filled";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
