@@ -103,7 +103,7 @@
         .slide-title {
             font-size: 28px;
             font-weight: 700;
-            color: #264f73;
+            color: #ffffff;
             margin-top: 0;
             margin-bottom: 15px;
             text-align: right;
@@ -118,21 +118,42 @@
 
         /* עיצוב קריא לסריקה מהירה בתבנית F */
         .text-section {
-            background-color: rgba(255, 255, 255, 0.75);
+            background-color: #264f73;
             border-radius: 12px;
             padding: 20px;
             text-align: right;
-            border-right: 5px solid #264f73;
+            border-right: 5px solid #65a0b3;
             max-width: 750px;
             /* הגבלת רוחב לשורות קצרות וקריאות יותר */
             width: 100%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            color: #ffffff;
         }
 
         .text-section p {
             font-size: 18px;
             line-height: 1.6;
             margin: 0;
-            color: #000000;
+            color: #ffffff;
+        }
+
+        .text-section strong {
+            color: #ffffff;
+        }
+
+        .text-section .circle-badge {
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .text-section .circle-badge.filled {
+            background-color: #ffffff;
+            color: #264f73;
+        }
+
+        .text-section .circle-badge.stroke {
+            background-color: transparent;
+            color: #ffffff;
         }
 
         .text-block {
