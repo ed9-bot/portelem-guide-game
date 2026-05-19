@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מי אוחז בהגה?</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Heebo', sans-serif;
+            background: url('texture.png') center top / cover no-repeat #f4e4bc;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #instruction-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #A65D6A;
+            color: #F2F2F2;
+            text-align: center;
+            padding: 5px 0;
+            font-size: 1rem;
+            font-weight: 700;
+            z-index: 40;
+        }
+
+        #motivation-msg {
+            position: absolute;
+            top: 35px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #731018;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 40;
+        }
+
+        #sky-sun {
+            position: absolute;
+            top: 2%;
+            right: 5%;
+            width: 80px;
+            height: auto;
+            z-index: 10;
+        }
+
+        .sky-cloud {
+            position: absolute;
+            width: 120px;
+            height: auto;
+            z-index: 15;
+            opacity: 0.8;
+        }
+
+        #game-world {
+            position: absolute;
+            top: 25%;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-image: url('water.png');
+            background-size: 150% 100%;
+            background-repeat: no-repeat;
+            background-position: calc(50% + (var(--steer-shift, 0vw) + var(--idle-sway-x, 0vw)) * 0.25) top;
+            transform: translateY(calc(var(--world-shift-y, 0px) * 0.6));
+        }
+
+        #flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.5);
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+
+        .world-object {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            will-change: top, left, transform;
+        }
+
+        .obstacle {
+            background: url('bomb.png') center bottom / contain no-repeat;
+        }
+
+        .collectible {
+            background: url('chest.png') center bottom / contain no-repeat;
+        }
+
+        #dashboard {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            max-width: 800px;
+            height: 250px;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            will-change: transform;
+        }
+
+        #ship-deck {
+            position: absolute;
+            bottom: 30px;
+            width: 120%;
+            max-width: 900px;
+            height: 350px;
+            background: url('ship.png') center bottom / contain no-repeat;
+            opacity: 0.8;
+            z-index: 11;
+        }
+
+        #wheel-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            z-index: 12;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #wheel-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.6));
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .status-box {
+            position: absolute;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #f1c40f;
+        }
+
+        #center-warning {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c0392b;
+            font-size: 2.2rem;
+            font-weight: 900;
+            z-index: 70;
+            opacity: 0;
+            text-align: center;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .warning-active {
+            opacity: 1 !important;
+        }
+
+        .floating-points {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: 900;
+            color: #ffd700;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUpPoints 1s ease-out forwards;
+        }
+
+        @keyframes floatUpPoints {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(0.5);
+            }
+
+            30% {
+                transform: translate(-50%, -30px) scale(1.2);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -80px) scale(1);
+            }
+        }
+
+        .encouragement-text {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2ecc71;
+            pointer-events: none;
+            z-index: 60;
+            opacity: 0;
+            text-align: center;
+        }
+
+        @keyframes flashRed {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .anim-flash-red {
+            animation: flashRed 0.25s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -80%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -100%);
+            }
+        }
+
+        .anim-float {
+            animation: floatUp 2.5s forwards;
+        }
+
+        .ship-shake {
+            animation: shipShake 0.3s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shipShake {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            25% {
+                transform: translateX(-50%) translateY(4px);
+            }
+
+            50% {
+                transform: translateX(-51%) translateY(-3px);
+            }
+
+            75% {
+                transform: translateX(-49%) translateY(2px);
+            }
+        }
+
+        #dialog-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: background 0.3s;
+        }
+
+        .dark-overlay {
+            background: rgba(4, 18, 33, 0.85) !important;
+        }
+
+        .dialog-box {
+            background-image: url('map.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: transparent;
+            border: none;
+            border-radius: 12px;
+            padding: 40px 50px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            color: #3e2723;
+            box-shadow: none;
+        }
+
+        .dialog-box h2 {
+            margin: 0 0 15px 0;
+            font-size: 2.2rem;
+            color: #8b3a00;
+        }
+
+        .dialog-box p {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(to bottom, #d35400, #a04000);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 35px;
+            font-size: 1.4rem;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+        }
+
+        .btn-primary-underline {
+            background: none;
+            border: none;
+            color: #d35400;
+            text-decoration: underline;
+            font-size: 1.4rem;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary-underline:hover {
+            color: #a04000;
+        }
+
+        .btn-primary-underline:active {
+            opacity: 0.7;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="instruction-banner">השתמשו בחיצי המקלדת ימינה ושמאלה כדי לאסוף אוצרות ולהימנע מפצצות</div>
+    <div id="motivation-msg" class="hidden">כשהפעולות משפיעות על המשחק, המוטיבציה עולה.</div>
+
+    <img src="sun.png" id="sky-sun"
+        style="transform: translate(calc((var(--steer-shift, 0vw) + var(--idle-sway-x, 0vw)) * 0.1), calc(var(--world-shift-y, 0px) * 0.2));"
+        alt="Sun">
+    <img src="cloud.png" class="sky-cloud"
+        style="top: 5%; left: 10%; transform: translate(calc((var(--steer-shift, 0vw) + var(--idle-sway-x, 0vw)) * 0.4), calc(var(--world-shift-y, 0px) * 0.3));"
+        alt="Cloud">
+    <img src="cloud.png" class="sky-cloud"
+        style="top: 15%; left: 70%; transform: translate(calc((var(--steer-shift, 0vw) + var(--idle-sway-x, 0vw)) * 0.7), calc(var(--world-shift-y, 0px) * 0.4));"
+        alt="Cloud">
+    <img src="cloud.png" class="sky-cloud"
+        style="top: 8%; left: 45%; transform: translate(calc((var(--steer-shift, 0vw) + var(--idle-sway-x, 0vw)) * 0.5), calc(var(--world-shift-y, 0px) * 0.35)) scale(0.8);"
+        alt="Cloud">
+
+    <div id="game-world">
+        <div id="flash-overlay"></div>
+    </div>
+
+    <div id="ui-layer">
+        <div id="score-box" class="status-box hidden">אוצר: <span id="score-val" style="color: #f1c40f;">0</span></div>
+    </div>
+
+    <div id="center-warning">ההגה לא מגיב לפעולה שלך!</div>
+
+    <div id="dashboard">
+        <div id="ship-deck"></div>
+        <div id="wheel-container">
+            <img src="wheel.png" alt="Steering Wheel">
+        </div>
+    </div>
+
+    <div id="encouragement-text"></div>
+
+    <div id="dialog-overlay">
+        <div id="dialog-content" class="dialog-box">
+            <h2>מוכנים לצאת לים הפתוח?</h2>
+            <p>בואו נרגיש איך זה לנווט בספינה שלנו.</p>
+            <p style="font-size: 1rem; color: #666;"> השתמשו בחיצי המקלדת ימינה ושמאלה כדי לאסוף אוצרות<br>ולהימנע
+                מפצצות
+            </p>
+            <button class="btn" onclick="startPhase1()">הפלגנו!</button>
+        </div>
+    </div>
+
+    <script>
+        const gameWorld = document.getElementById('game-world');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const wheel = document.getElementById('wheel-container');
+        const dashboard = document.getElementById('dashboard');
+        const dialogOverlay = document.getElementById('dialog-overlay');
+        const dialogContent = document.getElementById('dialog-content');
+        const scoreBox = document.getElementById('score-box');
+        const scoreVal = document.getElementById('score-val');
+        const centerWarning = document.getElementById('center-warning');
+        const encFeedback = document.getElementById('encouragement-text');
+        const motivationMsg = document.getElementById('motivation-msg');
+
+        let state = 'init';
+        let worldX = 0; let visualWheelRot = 0; let score = 0; let objects = [];
+        let lastTime = 0; let spawnTimer = 0; let phaseTimer = 0; let phase1Timer = 0;
+        let warningTimer = 0; let animationId;
+
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        const keys = { left: false, right: false };
+        window.addEventListener('keydown', e => {
+            initAudio();
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+        });
+
+        function startPhase1() {
+            dialogOverlay.classList.add('hidden'); state = 'phase1';
+            scoreBox.classList.add('hidden'); motivationMsg.classList.add('hidden');
+            centerWarning.classList.remove('warning-active');
+            resetWorld();
+            phaseTimer = 0; phase1Timer = 0; spawnTimer = 500; lastTime = performance.now(); warningTimer = 0;
+            if (!animationId) animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function triggerTransition() {
+            state = 'transition'; keys.left = false; keys.right = false;
+            centerWarning.classList.remove('warning-active');
+            dialogOverlay.classList.add('dark-overlay');
+            dialogContent.innerHTML = `
+                <h2>איי איי קפטן?</h2>
+                <p>שמת לב כמה זה מתסכל כאשר הבחירות שלך לא משפיעות על מה שקורה?</p>
+                <p style="font-size: 1.1rem; font-weight: normal;">במשחקים, ברגע שהסביבה לא מגיבה לפעולות שלנו, תחושת המעורבות הולכת לאיבוד.</p>
+                <p><strong>כעת השליטה באמת שלך , קפטן!</strong></p>
+                <button class="btn" onclick="startPhase2()">המשך</button>
+            `;
+            dialogOverlay.classList.remove('hidden');
+        }
+
+        function startPhase2() {
+            dialogOverlay.classList.add('hidden'); state = 'phase2';
+            score = 0; scoreVal.innerText = score; scoreBox.classList.remove('hidden');
+            motivationMsg.classList.remove('hidden');
+            resetWorld(); phaseTimer = 0; spawnTimer = 0; lastTime = performance.now();
+        }
+
+        function endGame() {
+            state = 'end'; motivationMsg.classList.add('hidden');
+            centerWarning.classList.remove('warning-active');
+            dialogOverlay.classList.add('dark-overlay');
+            dialogContent.innerHTML = `
+                <h2>עוגן למחשבה</h2>
+                <p style="font-size: 1.1rem; text-align: right; font-weight: normal; margin-bottom: 10px;">
+                שמתם לב להבדל בתחושה? בחלק הראשון לא משנה מה עשיתם הספינה בחרה מסלול משלה. <br><br>
+                למידה מבוססת משחק אמיתית דורשת מהמערכת <b>להגיב לבחירות של הלומד</b>. התגובה הזו יוצרת עצמאות ותחושת שליטה, המחזקים את המוטיבציה הפנימית להמשיך.
+                </p>
+                <div style="text-align: center;">
+                    <p style="font-size: 1.3rem; line-height: 1.5; margin-bottom: 25px; font-weight: bold;">
+                        סיימת והרווחת מטבעות! הם מחכים לך כאן למטה, יחד עם סיכום קצר
+                        <img src="coin.png" alt="Coin" style="width: 24px; vertical-align: middle; margin-right: 8px;">
+                    </p>
+                </div>
+                <div style="text-align: left; margin-top: 20px;">
+                    <button class="btn-primary-underline" onclick="location.reload()">סיום המשחק</button>
+                </div>
+            `;
+            dialogOverlay.classList.remove('hidden');
+        }
+
+        function resetWorld() {
+            objects.forEach(obj => obj.el.remove());
+            objects = []; worldX = 0; visualWheelRot = 0;
+        }
+
+        function gameLoop(time) {
+            // Idle sway for water and clouds (always running)
+            let idleSwayX = Math.sin(time / 2000) * 3; // +/- 3vw
+            let idleSwayY = Math.cos(time / 1500) * 6; // +/- 6px
+            document.documentElement.style.setProperty('--idle-sway-x', `${idleSwayX}vw`);
+            document.documentElement.style.setProperty('--world-shift-y', `${idleSwayY}px`);
+
+            if (state === 'transition' || state === 'end') {
+                lastTime = time; animationId = requestAnimationFrame(gameLoop); return;
+            }
+
+            let dt = time - lastTime; lastTime = time;
+            if (dt > 100) dt = 16;
+
+            if (state === 'init') {
+                animationId = requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            phaseTimer += dt;
+
+            if (state === 'phase1' && phaseTimer > 10000) {
+                triggerTransition();
+            } else if (state === 'phase2' && phaseTimer > 25000) {
+                endGame();
+            } else {
+                updateShip(dt); handleSpawns(dt); updateObjects(dt);
+            }
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateShip(dt) {
+            const speed = 0.035 * dt;
+
+            if (state === 'phase1') {
+                phase1Timer += dt;
+
+                if (phase1Timer < 2000) {
+                    if (keys.left) { worldX = Math.max(-40, worldX - speed); visualWheelRot = Math.max(-45, visualWheelRot - 4); }
+                    else if (keys.right) { worldX = Math.min(40, worldX + speed); visualWheelRot = Math.min(45, visualWheelRot + 4); }
+                    else { visualWheelRot *= 0.8; }
+                }
+                else {
+                    worldX += speed * 0.3;
+                    if (worldX > 40) worldX = 40;
+                    visualWheelRot = Math.sin(phaseTimer / 300) * 30;
+
+                    if (keys.left || keys.right) {
+                        warningTimer = 1000;
+                    }
+
+                    if (warningTimer > 0) {
+                        centerWarning.classList.add('warning-active');
+                        warningTimer -= dt;
+                    } else {
+                        centerWarning.classList.remove('warning-active');
+                    }
+                }
+            } else if (state === 'phase2') {
+                const slowSpeed = speed * 0.6;
+                if (keys.left) { worldX = Math.max(-40, worldX - slowSpeed); visualWheelRot = Math.max(-45, visualWheelRot - 4); }
+                else if (keys.right) { worldX = Math.min(40, worldX + speed); visualWheelRot = Math.min(45, visualWheelRot + 4); }
+                else { visualWheelRot *= 0.8; }
+            }
+
+            const wheelImg = wheel.querySelector('img');
+            if (wheelImg) wheelImg.style.transform = `rotate(${visualWheelRot}deg)`;
+
+            document.documentElement.style.setProperty('--steer-shift', `${-worldX}vw`);
+        }
+
+        function handleSpawns(dt) {
+            spawnTimer += dt;
+            const rate = state === 'phase1' ? 1200 : 2000;
+
+            if (spawnTimer > rate) {
+                spawnTimer = 0;
+                let type;
+                let rand = Math.random();
+
+                // הוספת ממתקים בשלב השני
+                if (state === 'phase1') {
+                    type = rand > 0.4 ? 'obstacle' : 'collectible';
+                } else {
+                    if (rand < 0.5) type = 'obstacle';
+                    else type = 'collectible';
+                }
+
+                let spawnX = (Math.random() * 80) - 40;
+
+                const el = document.createElement('div');
+                el.className = `world-object ${type}`;
+                gameWorld.appendChild(el);
+
+                objects.push({ el: el, type: type, x: spawnX, y: 30, age: 0, resolved: false });
+            }
+        }
+
+        function updateObjects(dt) {
+            const travelSpeed = (state === 'phase1' ? 0.035 : 0.015) * dt;
+
+            for (let i = objects.length - 1; i >= 0; i--) {
+                let obj = objects[i];
+                obj.y += travelSpeed;
+                obj.age += dt;
+
+                let popProgress = Math.min(1, obj.age / 300);
+                let bounce = popProgress < 1 ? Math.sin(popProgress * Math.PI) * 0.2 : 0;
+
+                let baseScale = 0.2 + (obj.y / 80) * 1.5;
+                let finalScale = baseScale * (popProgress + bounce);
+
+                let perspectiveShift = (obj.x - worldX) * baseScale;
+                let visualLeft = 50 + perspectiveShift;
+                let visualTop = obj.y;
+
+                obj.el.style.left = `${visualLeft}%`;
+                obj.el.style.top = `${visualTop}%`;
+                obj.el.style.transform = `translate(-50%, -100%) scale(${finalScale})`;
+
+                // תיקון אזור הפגיעה!
+                // פגיעה מתרחשת בגובה נמוך יותר (65-85) כך שהחפץ עדיין גלוי לגמרי כשהוא נאסף!
+                // אזור הפגיעה הרוחבי (X) הוגדל ל-18 לחישה סלחנית וטבעית יותר.
+                if (obj.y > 65 && obj.y < 85 && !obj.resolved) {
+                    if (Math.abs(obj.x - worldX) < 18) {
+                        obj.resolved = true;
+                        handleCollision(obj.type, visualLeft, visualTop);
+                        obj.el.remove(); // הסרת החפץ
+                        objects.splice(i, 1);
+                        continue;
+                    }
+                }
+
+                if (obj.y >= 85 && !obj.resolved) obj.resolved = true;
+                if (obj.y > 105) { obj.el.remove(); objects.splice(i, 1); }
+            }
+        }
+
+        function handleCollision(type, vLeft, vTop) {
+            if (type === 'obstacle') {
+                flashOverlay.classList.remove('anim-flash-red');
+                void flashOverlay.offsetWidth;
+                flashOverlay.classList.add('anim-flash-red');
+
+                dashboard.classList.remove('ship-shake');
+                void dashboard.offsetWidth;
+                dashboard.classList.add('ship-shake');
+
+                if (state === 'phase2') {
+                    score = Math.max(0, score - 5);
+                    scoreVal.innerText = score;
+                }
+            } else if (type === 'collectible') {
+                // הצגת הניקוד בדיוק במיקום שהפריט נעלם!
+                showPointsNextToObj(vLeft, vTop, "+10");
+
+                if (state === 'phase2') {
+                    score += 10;
+                    scoreVal.innerText = score;
+                    showEncouragement();
+                }
+            }
+        }
+
+        function showPointsNextToObj(xPercent, yPercent, text) {
+            const ptDiv = document.createElement('div');
+            ptDiv.className = 'floating-points';
+            ptDiv.innerText = text;
+            ptDiv.style.left = `${xPercent}%`;
+            // מאחר שה-yPercent היה יחסית לאובייקט בתלת ממד, 
+            // אנחנו משתמשים בו בצורה ישירה על המסך:
+            ptDiv.style.top = `${yPercent}%`;
+            gameWorld.appendChild(ptDiv);
+
+            setTimeout(() => {
+                if (ptDiv.parentNode) ptDiv.parentNode.removeChild(ptDiv);
+            }, 1000);
+        }
+
+        function showEncouragement() {
+            encFeedback.innerText = encouragements[Math.floor(Math.random() * encouragements.length)];
+            encFeedback.className = "encouragement-text";
+            void encFeedback.offsetWidth;
+            encFeedback.classList.add('anim-float');
+        }
+
+        const encouragements = ["איסוף יפה!", "ככה נראית שליטה!", "מעולה!", "נאסף!", "כל הכבוד!"];
+
+        // Start idle animation immediately
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(gameLoop);
+    </script>
+</body>
+
+</html>
