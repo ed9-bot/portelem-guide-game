@@ -378,6 +378,33 @@
             opacity: 0.7;
         }
 
+        #mute-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #fce0a2, #dfa95c);
+            border: 2px solid #3e2723;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 80;
+            color: #3e2723;
+            transition: transform 0.1s;
+        }
+        #mute-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        #mute-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -410,6 +437,13 @@
         <div id="score-box" class="status-box hidden">אוצר: <span id="score-val" style="color: #f1c40f;">0</span></div>
     </div>
 
+    <div id="mute-btn" onclick="toggleMute()">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+    </div>
+
     <div id="center-warning">ההגה לא מגיב לפעולה שלך!</div>
 
     <div id="dashboard">
@@ -425,9 +459,6 @@
         <div id="dialog-content" class="dialog-box">
             <h2>מוכנים לצאת לים הפתוח?</h2>
             <p>בואו נרגיש איך זה לנווט בספינה שלנו.</p>
-            <p style="font-size: 1rem; color: #666;"> השתמשו בחיצי המקלדת ימינה ושמאלה כדי לאסוף אוצרות<br>ולהימנע
-                מפצצות
-            </p>
             <button class="btn" onclick="startPhase1()">הפלגנו!</button>
         </div>
     </div>
@@ -456,6 +487,61 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
+        let isMuted = false;
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteBtn = document.getElementById('mute-btn');
+            if (isMuted) {
+                muteBtn.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>`;
+            } else {
+                initAudio();
+                muteBtn.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>`;
+            }
+        }
+
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (isMuted || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playPositiveSound() {
+            if (isMuted) return;
+            initAudio();
+            playTone(440, 'sine', 0.1, 0.1);
+            setTimeout(() => playTone(554.37, 'sine', 0.1, 0.1), 100);
+            setTimeout(() => playTone(659.25, 'sine', 0.2, 0.1), 200);
+        }
+
+        function playNegativeSound() {
+            if (isMuted) return;
+            initAudio();
+            playTone(200, 'triangle', 0.2, 0.1);
+            setTimeout(() => playTone(150, 'triangle', 0.3, 0.1), 150);
+        }
+
         const keys = { left: false, right: false };
         window.addEventListener('keydown', e => {
             initAudio();
@@ -482,9 +568,11 @@
             dialogOverlay.classList.add('dark-overlay');
             dialogContent.innerHTML = `
                 <h2>איי איי קפטן?</h2>
-                <p>שמת לב כמה זה מתסכל כאשר הבחירות שלך לא משפיעות על מה שקורה?</p>
-                <p style="font-size: 1.1rem; font-weight: normal;">במשחקים, ברגע שהסביבה לא מגיבה לפעולות שלנו, תחושת המעורבות הולכת לאיבוד.</p>
-                <p><strong>כעת השליטה באמת שלך , קפטן!</strong></p>
+                <div style="text-align: right;">
+                    <p>שמת לב כמה זה מתסכל כאשר הבחירות שלך לא משפיעות על מה שקורה?</p>
+                    <p style="font-size: 1.1rem; font-weight: normal;">במשחקים, ברגע שהסביבה לא מגיבה לפעולות שלנו, תחושת המעורבות הולכת לאיבוד.</p>
+                    <p><strong>כעת השליטה באמת שלך , קפטן!</strong></p>
+                </div>
                 <button class="btn" onclick="startPhase2()">המשך</button>
             `;
             dialogOverlay.classList.remove('hidden');
@@ -666,6 +754,7 @@
 
         function handleCollision(type, vLeft, vTop) {
             if (type === 'obstacle') {
+                playNegativeSound();
                 flashOverlay.classList.remove('anim-flash-red');
                 void flashOverlay.offsetWidth;
                 flashOverlay.classList.add('anim-flash-red');
@@ -679,6 +768,7 @@
                     scoreVal.innerText = score;
                 }
             } else if (type === 'collectible') {
+                playPositiveSound();
                 // הצגת הניקוד בדיוק במיקום שהפריט נעלם!
                 showPointsNextToObj(vLeft, vTop, "+10");
 
